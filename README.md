@@ -6,10 +6,10 @@ smpeople 프로그래밍 게시판(https://smpeople.net/hobby_program) 새 글 �
 
 한시간 주기로 https://smpeople.net/hobby_program 의 최신 게시물을 긁어와서 디코의 "프로그래밍-게시판"라는 이름의 채팅 채널이 있어야 링크를 올려줍니다.
 
->도움말
+<p>>도움말</p>
 도움말을 출력합니다.
 
->갱신
+<p>>갱신</p>
 주기를 무시하고 최신 게시글을 긁어옵니다.
 
 
