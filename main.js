@@ -7,12 +7,7 @@ const help = fs.readFileSync('./README.md');
 const axios = require("axios");
 const cheerio = require("cheerio");
 
-const setting = {
-    interval: 60*60*1000,
-    boardType: 'hobby_program',
-    channelName: '프로그래밍-게시판',
-    guild:{},
-};
+const setting = JSON.parse(fs.readFileSync('./setting.json'));
 
 const getHtml = async () => {
   try {
@@ -21,25 +16,24 @@ const getHtml = async () => {
     console.error(error);
   }
 };
-
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+client.on('ready', ()=>{
+    console.log(`Logged in as ${client.user.tag}!`);
+    client.setInterval(()=>{
+        const channel = client.channels.cache.find(c => c.name === '봇-명령어');
+        channel.send('>갱신');
+    }, setting.interval);
 });
-client.setInterval(()=>{
-    reload();
-}, setting.interval);//end client
 
-client.on('message', async (msg) => {
-
+client.on('message', async function (msg) {
     const guildName = msg.guild.name;
     const reload = ()=>{
         getHtml()
-        .then(html => {
+        .then(async html => {
           let ulList = [];
           const $ = cheerio.load(html.data);
           const $bodyList = $('tbody').children('tr');
 
-          $bodyList.each(function(i, elem) {
+          await $bodyList.each(function(i, elem) {
             if(setting.guild[guildName] === undefined){
                 setting.guild[guildName] = 0;
             }
@@ -48,16 +42,19 @@ client.on('message', async (msg) => {
                   setting.guild[guildName] = parseInt($(elem).find('td.no').text());
               }
           });
+          await fs.writeFile('./setting.json', JSON.stringify(setting), (err) => {
+            if (err) throw err;
+          });
           return ulList.reverse();
         })
         .then(res => {
             res.forEach((element)=>{
                 const channel = client.channels.cache.find(c => c.name === setting.channelName);
                 channel.send(`https://smpeople.net${element}`);
-                
             });
         });
-    }
+        
+    };
     if(msg.content === ">도움말"){
         let str = "\`\`\`"+help+"\`\`\`";
         msg.channel.send(str);
